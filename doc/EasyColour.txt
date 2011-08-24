@@ -1,0 +1,184 @@
+*EasyColour.txt*       Easy Colour Schemes
+
+Author:     A. S. Budden <abuddenNOSPAM@NOSPAMgmail.com>
+			Remove NOSPAM.
+
+Copyright:  (c) 2011 by A. S. Budden                  *EasyColour-copyright*
+            Permission is hereby granted to use and distribute this code,
+            with or without modifications, provided that this copyright
+            notice is copied with it. Like anything else that's free,
+            the TagHighlight plugin is provided *as is* and comes with no
+            warranty of any kind, either expressed or implied. By using
+            this plugin, you agree that in no event will the copyright
+            holder be liable for any damages resulting from the use
+            of this software.
+
+==============================================================================
+1. Contents                            *EasyColour* *EasyColour-contents*     {{{1
+
+	1.    Contents                           |EasyColour-contents|
+
+	2.    EasyColour Manual                  |EasyColour-manual|
+	2.1	  Introduction                       |EasyColour-intro|
+	2.2	  Installation                       |EasyColour-install|
+	2.3   Simple Colour Schemes              |EasyColour-simple|
+	2.4   Format Reference                   |EasyColour-format|
+	2.5   Highlight Group Reference          |EasyColour-highlight|
+
+	3.    EasyColour History                 |EasyColour-history|
+
+==============================================================================
+2. EasyColour Manual                   *EasyColour-manual*                  {{{1
+
+2.1 Introduction                       *EasyColour-intro*                   {{{2
+
+	This plugin makes it really easy to create your own colour scheme for Vim.
+	You don't need to understand the syntax of Vim script and if you want to
+	base your colour scheme on an existing one, you can!
+
+	The plugin was originally written in order to make it easier for people to
+	use my |TagHighlight| plugin, available from here:
+>
+		http://www.cgtk.co.uk/taghighlight
+<
+	The |TagHighlight| plugin highlights the names of classes, variables, types
+	etc in source code in Vim. This makes it quicker and easier to spot errors
+	in your code.  However, most Vim colour schemes don't support these extra
+	groups.  By default, |TagHighlight| will simply highlight them all in the
+	same way as Keywords, but it can be useful to have a means of
+	distinguishing between them more clearly.
+
+	EasyColour also allows you to 'scratch an itch': change a little detail on
+	an existing colour scheme.  For example, if you really like the "desert"
+	colour scheme but want the comments to be green, that can be done very
+	easily!
+
+	Finally, if you want to create a new colour scheme from scratch, it's much
+	easier with EasyColour.
+
+2.2 Installation                       *EasyColour-install*                 {{{2
+
+2.2.1 With Pathogen                    *EasyColour-install-pathogen*        {{{3
+
+	If you don't know what pathogen is and aren't interested, please ignore
+	this section and see |EasyColour-install-no-pathogen|.  If you don't know
+	what it is and do care, please see:
+>
+		https://github.com/tpope/vim-pathogen
+<
+	If you've got pathogen installed, unzip the EasyColour zip file into your
+	pathogen bundles directory; nothing else needs to be done!
+
+2.2.1 Without Pathogen                 *EasyColour-install-no-pathogen*     {{{3
+
+	To install without pathogen, simply unzip the EasyColour zip file into
+	your ~/.vim or vimfiles directory (depending on your platform).  In your
+	vimrc, select a colour scheme using the |colorscheme| command.
+
+2.3 Simple Colour Schemes              *EasyColour-simple*                  {{{2
+
+	An EasyColour colour scheme consists of two files, both placed in the
+	"colors" directory in your ~/.vim or vimfiles directory.  These should
+	have the same name, but one should have the extension ".vim" and one
+	should have the extension ".txt".  Assuming a colour scheme called
+	"my_colour_scheme", create two files: ~/.vim/colors/my_colour_scheme.vim
+	and ~/.vim/colors/my_colour_scheme.txt (substitute ~/.vim with the path to
+	your vimfiles directory if you're on Windows).
+
+	my_colour_scheme.vim should look like this:
+>
+		set background=light
+		hi clear
+		if exists("syntax_on")
+			syntax reset
+		endif
+		call EasyColour#ColourScheme#LoadColourScheme('my_colour_scheme')
+<
+	The ONLY things you'll need to change for your colour scheme are:
+		
+		* The name (near the end of the last line);
+		* If you want a dark background, replace "light" with "dark" on the
+		  first line.
+
+	All of the colour customisation is done in my_colour_scheme.txt.  The
+	format of this is very simple.  An example is below:
+>
+		# Saving this file will update the current colour scheme.
+		Basis:default
+		Light:
+			Comment:DarkGreen
+			Error:Yellow,Red
+			Class:Blue
+			DefinedName:Blue
+			EnumerationValue:#880000
+			EnumerationName:#880000
+			Member:DarkBlue
+			Union:DarkGreen
+			GlobalVariable:Red
+			LocalVariable:Red
+			GlobalConstant:Red
+
+		# vim: ff=unix:noet:ft=EasyColour
+<
+	Lines starting with '#' are treated as comments and ignored.  The first
+	line that does anything is 'Basis:default'.  This tells EasyColour that
+	you want your colour scheme to be based on Vim's default colour scheme.
+	If you want to create a colour scheme from scratch, either omit this line
+	or use 'Basis:None'.
+
+	Since we're using a light background, the next line is 'Light:'.  This
+	specifies that all of the following colours are for a light background.
+	Each line after that starts with a single tab character (a hard tab, not
+	spaces), then a highlight group, a colon (:) and then a colour
+	specification.
+
+	Where that colour is a simple colour name (e.g. DarkGreen), it will be set
+	as the foreground colour for that highlight group.  So in the above
+	example, comments will be highlighted with the normal background colour
+	(white for the default colour scheme) and with the text in dark green.
+
+	Where the colour is defined as a '#' symbol followed by six hexadecimal
+	characters, this will be used as an RGB colour.  For example, #880000 is a
+	pale browny-red.  There are lots of HTML colour wheels online that make it
+	easy to find these colours.
+
+	Where the colour is defined as several comma-separated entries, they will
+	be treated as (in order):
+
+		* Foreground Colour
+		* Background Colour
+		* Special Colour (the colour of underlines etc)
+		* Style (choose from 'Underline', 'Undercurl', 'Bold' etc)
+	
+	So the line 'Error:Yellow,Red' will make errors be shown as yellow text on
+	a red background.  There are other ways to define colours as well; these
+	are detailed in |EasyColour-format|.
+	
+	The last line in the file is a Vim |modeline| that keeps the file format
+	as Unix (so it works on Linux and Windows), ensures tabs are not expanded
+	(as you need a hard tab at the start of some lines) and tells Vim it's an
+	EasyColour colour scheme so that it gets highlight in its own colours.
+
+	There are some more examples in the "colors/" directory in the EasyColour
+	distribution.
+
+2.4 Format Reference                   *EasyColour-format*                  {{{2
+
+	TODO...
+
+2.5 Highlight Group Reference          *EasyColour-highlight*               {{{2
+
+	There's a list of a lot of the built-in highlight groups in the Vim help
+	for |group-name|.  |TagHighlight| adds lots more depending on the programming
+	language that you're using.  See |TagHighlight-language-colours| for
+	details on how to find the list of highlight groups for your programming
+	language.
+
+==============================================================================
+3. EasyColour History                  *EasyColour-history*                 {{{1
+
+0.0.1:  XXXX XXXXXXXXX 2011    : ...
+
+==============================================================================
+Modelines: {{{1
+ vim:tw=78:ts=4:ft=help:fdm=marker:
