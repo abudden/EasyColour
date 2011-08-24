@@ -27,9 +27,11 @@ function! EasyColour#ColourScheme#LoadColourScheme(name)
 		let &background = tolower(ColourScheme['Background'])
 	endif
 
+	let has_basis = 0
 	if has_key(ColourScheme, 'Basis')
 		if ColourScheme['Basis'] != 'None'
 			exe 'runtime!' 'colors/' . ColourScheme['Basis'] . '.vim'
+			let has_basis = 1
 		endif
 	endif
 	let g:colors_name = a:name
@@ -53,7 +55,7 @@ function! EasyColour#ColourScheme#LoadColourScheme(name)
 	endif
 
 	if handler == 'Standard'
-		if ! has_key(ColourScheme[details], 'Normal')
+		if ! has_basis && ! has_key(ColourScheme[details], 'Normal')
 			if &background == 'dark'
 				let ColourScheme[details]['Normal'] = ["White","Black"]
 			else
@@ -76,7 +78,11 @@ function! s:StandardHandler(Colours)
 		if hlgroup == 'Normal'
 			continue
 		elseif hlgroup == 'EasyColourNormalForce'
-			let hlgroup = 'Normal'
+			if has_key(a:Colours, 'Normal')
+				let hlgroup = 'Normal'
+			else
+				continue
+			endif
 		endif
 
 		if hlgroup !~ '^\k*$'
