@@ -24,7 +24,10 @@ for line in lines
 	let keywords += [keyword,]
 endfor
 
-syn clear vimVar
+try
+	syn clear vimVar
+catch
+endtry
 
 syn match Keyword /^\k\+:/me=e-1
 for keyword in keywords
