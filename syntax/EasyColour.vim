@@ -30,6 +30,7 @@ catch
 endtry
 
 syn match Keyword /^\k\+:/me=e-1
+syn match Comment /^\s*#.*/
 for keyword in keywords
 	if keyword =~ '^\k*$'
 		execute 'syn match '.keyword." /^\t".keyword.":/ms=s+1,me=e-1"
