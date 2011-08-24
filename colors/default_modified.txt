@@ -1,3 +1,4 @@
+# Saving this file will update the current colour scheme.
 Basis:default
 Light:
 	Comment:DarkGreen
@@ -11,4 +12,4 @@ Light:
 	LocalVariable:Red
 	GlobalConstant:Red
 
-# vim: ff=unix:noet
+# vim: ff=unix:noet:ft=EasyColour

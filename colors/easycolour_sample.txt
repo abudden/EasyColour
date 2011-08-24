@@ -1,3 +1,4 @@
+# Saving this file will update the current colour scheme.
 Background:Dark
 Basis:None
 Dark:
@@ -85,4 +86,4 @@ LightOverride:
 	SpecialKey:#AAAAAA
 	NonText:#AAAAAA
 
-# vim: ff=unix:noet
+# vim: ff=unix:noet:ft=EasyColour
