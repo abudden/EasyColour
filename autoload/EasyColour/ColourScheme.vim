@@ -70,7 +70,7 @@ endfunction
 
 let s:gui_fields = {'FG': 'guifg', 'BG': 'guibg', 'Style': 'gui', 'SP': 'guisp'}
 let s:all_gui_fields = ['guifg', 'guibg', 'gui', 'guisp']
-let s:field_order = ["FG","BG","Style","SP"]
+let s:field_order = ["FG","BG","SP","Style"]
 
 function! s:StandardHandler(Colours)
 	for hlgroup in ['EasyColourNormalForce'] + keys(a:Colours)
