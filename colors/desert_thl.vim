@@ -21,4 +21,4 @@ if exists("syntax_on")
 	syntax reset
 endif
 
-call EasyColour#ColourScheme#LoadColourScheme('easycolour_sample')
+call EasyColour#ColourScheme#LoadColourScheme('desert_thl')

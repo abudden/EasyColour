@@ -1,11 +1,10 @@
-" Tag Highlighter:
+" Easy Colour:
 "   Author:  A. S. Budden <abudden _at_ gmail _dot_ com>
-"   Date:    02/08/2011
 " Copyright: Copyright (C) 2009-2011 A. S. Budden
 "            Permission is hereby granted to use and distribute this code,
 "            with or without modifications, provided that this copyright
 "            notice is copied with it. Like anything else that's free,
-"            the TagHighlight plugin is provided *as is* and comes with no
+"            the EasyColour plugin is provided *as is* and comes with no
 "            warranty of any kind, either expressed or implied. By using
 "            this plugin, you agree that in no event will the copyright
 "            holder be liable for any damages resulting from the use
@@ -13,20 +12,29 @@
 
 " ---------------------------------------------------------------------
 try
-	if &cp || (exists('g:loaded_TagHLLoadDataFile') && (g:plugin_development_mode != 1))
+	if &cp || (exists('g:loaded_EasyColourLoadDataFile') && (g:plugin_development_mode != 1))
 		throw "Already loaded"
 	endif
 catch
 	finish
 endtry
-let g:loaded_TagHLLoadDataFile = 1
+let g:loaded_EasyColourLoadDataFile = 1
 
-function! TagHighlight#LoadDataFile#LoadDataFile(filename)
-	let filename = g:TagHighlightPrivate['PluginPath'] . '/data/' . a:filename
-	return TagHighlight#LoadDataFile#LoadFile(filename)
+let s:plugin_paths = split(globpath(&rtp, 'autoload/EasyColour/ColourScheme.vim'), '\n')
+if len(s:plugin_paths) == 1
+	let s:easycolour_install_path = fnamemodify(s:plugin_paths[0], ':p:h:h:h')
+elseif len(s:plugin_paths) == 0
+	echoerr "Cannot find ColourScheme.vim"
+else
+	echoerr "Multiple plugin installs found: something has gone wrong!"
+endif
+
+function! EasyColour#LoadDataFile#LoadColourSpecification(name)
+	let filename = split(globpath(&rtp, 'colors/' . a:name . '.txt'), '\n')[0]
+	return s:LoadFile(filename)
 endfunction
 
-function! TagHighlight#LoadDataFile#LoadFile(filename)
+function! s:LoadFile(filename)
 	let result = {}
 	let entries = readfile(a:filename)
 	
@@ -55,21 +63,20 @@ function! TagHighlight#LoadDataFile#LoadFile(filename)
 				" Clear the top key as this isn't a multi-line entry
 				let top_key = ''
 			else
-				call TagHLDebug("  Unhandled line: '" . entry . "'", "Error")
+				echoerr "  Unhandled line: '" . entry . "'"
 			endif
 		elseif entry[0] == "\t" && top_key != ''
 			" This is a continuation of a top level key
-			if stridx(entry, ':') != -1
-				" The key is a dictionary, check for mismatch:
-				if has_key(result, top_key)
-					if type(result[top_key]) != type({})
-						call TagHLDebug("Type mismatch on line '".entry."': expected key:value", "Error")
-					endif
-				else
+			if stridx(entry[1:], ':') != -1
+				" The key is a dictionary:
+				if ! has_key(result, top_key)
 					let result[top_key] = {}
 				endif
 				" Handle the entry (without the preceding tab)
 				let parts = split(entry[1:], ':')
+				if len(parts) < 2
+					echoerr "Invalid entry: '" . entry[1:] . "'"
+				endif
 				" Rather coarse replacement of split(x,y,n)
 				if len(parts) > 2
 					let parts[1] = join(parts[1:], ':')
@@ -81,16 +88,7 @@ function! TagHighlight#LoadDataFile#LoadFile(filename)
 					let result[top_key][parts[0]] = parts[1]
 				endif
 			else
-				" This is a list of strings, check for mismatch
-				if has_key(result, top_key)
-					if type(result[top_key]) != type([])
-						call TagHLDebug("Type mismatch on line '".entry."': didn't expect key:value", "Error")
-					endif
-				else
-					let result[top_key] = []
-				endif
-				" Add to the list (without the preceding tag)
-				let result[top_key] += [entry[1:]]
+				echoerr "Type mismatch on line '".entry."': expected key:value"
 			endif
 		else
 			" Probably a comment or blank line
