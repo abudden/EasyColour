@@ -2,6 +2,7 @@
 Basis:default
 Light:
 	Comment:DarkGreen
+	Error:Yellow,Red
 	Class:Blue
 	DefinedName:Blue
 	EnumerationValue:#880000
