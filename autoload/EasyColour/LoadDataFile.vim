@@ -43,8 +43,9 @@ function! s:LoadFile(filename)
 		" Remove white-space on the end of the line
 		let entry = substitute(entry, '\s\+$', '', '')
 		if entry[0] == '#'
+			" Comment: ignore
 		elseif entry[0] =~ '\k'
-			" Keyword character, so not sub entry or comment
+			" Keyword character first, so not sub entry or comment
 			if entry[len(entry)-1:] == ":"
 				" Beginning of a field, but we don't know whether
 				" it's a list of a dict yet
@@ -67,17 +68,18 @@ function! s:LoadFile(filename)
 			else
 				echoerr "  Unhandled line: '" . entry . "'"
 			endif
-		elseif entry[0] == "\t" && top_key != ''
+		elseif top_key != '' && entry =~ '^\s\+'
 			" This is a continuation of a top level key
-			if stridx(entry[1:], ':') != -1
+			let details = substitute(entry, '^\s\+', '', '')
+			if stridx(details, ':') != -1
 				" The key is a dictionary:
 				if ! has_key(result, top_key)
 					let result[top_key] = {}
 				endif
 				" Handle the entry (without the preceding tab)
-				let parts = split(entry[1:], ':')
+				let parts = split(details, ':')
 				if len(parts) < 2
-					echoerr "Invalid entry: '" . entry[1:] . "'"
+					echoerr "Invalid entry: '" . details . "'"
 				endif
 				" Rather coarse replacement of split(x,y,n)
 				if len(parts) > 2
