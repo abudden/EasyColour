@@ -157,7 +157,7 @@ Copyright:  (c) 2011 by A. S. Budden                  *EasyColour-copyright*
 	The last line in the file is a Vim |modeline| that keeps the file format
 	as Unix (so it works on Linux and Windows), ensures tabs are not expanded
 	(as you need a hard tab at the start of some lines) and tells Vim it's an
-	EasyColour colour scheme so that it gets highlight in its own colours.
+	EasyColour colour scheme so that it gets highlighted in its own colours.
 
 	There are some more examples in the "colors/" directory in the EasyColour
 	distribution.
