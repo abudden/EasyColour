@@ -40,6 +40,8 @@ function! s:LoadFile(filename)
 	
 	let top_key = ''
 	for entry in entries
+		" Remove white-space on the end of the line
+		let entry = substitute(entry, '\s\+$', '', '')
 		if entry[0] == '#'
 		elseif entry[0] =~ '\k'
 			" Keyword character, so not sub entry or comment
