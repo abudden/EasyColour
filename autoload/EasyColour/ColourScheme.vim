@@ -22,7 +22,6 @@ let g:loaded_EasyColourColourScheme = 1
 
 function! EasyColour#ColourScheme#LoadColourScheme(name)
 	let ColourScheme = EasyColour#LoadDataFile#LoadColourSpecification(a:name)
-	echo ColourScheme
 
 	if has_key(ColourScheme, 'Background')
 		let &background = tolower(ColourScheme['Background'])
