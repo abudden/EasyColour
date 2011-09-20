@@ -69,7 +69,7 @@ function! EasyColour#ColourScheme#LoadColourScheme(name)
 endfunction
 
 let s:gui_fields = {'FG': 'guifg', 'BG': 'guibg', 'Style': 'gui', 'SP': 'guisp'}
-let s:cterm_fields = {'FG': 'ctermfg', 'BG': 'ctermbg', 'Style': 'term'}
+let s:cterm_fields = {'FG': 'ctermfg', 'BG': 'ctermbg', 'Style': 'cterm'}
 let s:all_cterm_fields = ['ctermfg', 'ctermbg', 'term']
 let s:all_gui_fields = ['guifg', 'guibg', 'gui', 'guisp']
 let s:field_order = ["FG","BG","SP","Style"]
