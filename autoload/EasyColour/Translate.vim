@@ -22,6 +22,7 @@ let g:loaded_EasyColourTranslate = 1
 
 let s:RGBMap = {}
 let s:loaded_rgb_map = 0
+let s:calculated_available_colours = 0
 
 " 88 Colour and 256 Colour terminals are calculated on the fly
 let s:available_colours = 
@@ -61,6 +62,9 @@ let s:available_colours =
 let s:available_rgb_colours = {}
 
 function! s:CalculateAvailableRGBColours()
+	if ! s:loaded_rgb_map
+		call s:LoadRGBMap()
+	endif
 	for k in ['CT8', 'CT16']
 		let s:available_rgb_colours[k] = {}
 		for colour in s:available_colours[k]
@@ -100,6 +104,7 @@ function! s:CalculateAvailableRGBColours()
 		let level = (grey*10) + 8
 		let s:available_rgb_colours['CT256'][232+grey] = [level,level,level]
 	endfor
+	let s:calculated_available_colours = 1
 endfunction
 
 function! s:LoadRGBMap()
@@ -136,7 +141,11 @@ function! s:RGBToHex(colour)
 endfunction
 
 function! EasyColour#Translate#FindNearest(subset, colour)
-	if ! has_key(s:available_colours, a:subset)
+	if ! s:calculated_available_colours
+		call s:CalculateAvailableRGBColours()
+	endif
+
+	if ! has_key(s:available_rgb_colours, a:subset)
 		echoerr "Unrecognised subset: " . a:subset
 	endif
 
@@ -153,10 +162,10 @@ function! EasyColour#Translate#FindNearest(subset, colour)
 		echoerr "Unrecognised colour: '" . a:colour . "'"
 	endif
 
-	let min_distance = 7
+	let min_distance = 0
 	let closest_colour = ''
-	for subset_colour in s:available_colours[a:subset]
-		let rgb_colour = s:RGBMap[tolower(subset_colour)]
+	for subset_colour in keys(s:available_rgb_colours[a:subset])
+		let rgb_colour = s:available_rgb_colours[a:subset][subset_colour]
 
 		" Now find the 'distance' to each colour
 		let distance = s:ColourDistance(req_rgb_colour, rgb_colour)
