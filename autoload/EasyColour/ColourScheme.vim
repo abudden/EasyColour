@@ -102,6 +102,7 @@ function! s:GetColourMap()
 			echoerr "Unrecognised terminal colour count"
 		endif
 	endif
+	return colour_map
 endfunction
 
 function! s:GenerateColourMap(Colours)
