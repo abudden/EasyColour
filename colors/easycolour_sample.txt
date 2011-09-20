@@ -1,5 +1,4 @@
 # Saving this file will update the current colour scheme.
-Background:Dark
 Basis:None
 Dark:
 	Normal:White,Black
@@ -75,7 +74,6 @@ Dark:
 	hlLevel9:#698b22
 LightAuto:True
 LightOverride:
-	Normal:Black,White
 	Comment:DarkGreen
 	String:#663300
 	Union:DarkGrey
