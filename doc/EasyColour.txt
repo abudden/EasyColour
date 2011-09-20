@@ -54,7 +54,9 @@ Copyright:  (c) 2011 by A. S. Budden                  *EasyColour-copyright*
 	easily!
 
 	Finally, if you want to create a new colour scheme from scratch, it's much
-	easier with EasyColour.
+	easier with EasyColour: it'll even work out the best colours to use in a
+	(reduced colour range) terminal window so you only have to choose the
+	colours once (it supports 8, 16 and 256 colour terminals).
 
 2.2 Installation                       *EasyColour-install*                 {{{2
 
@@ -66,6 +68,8 @@ Copyright:  (c) 2011 by A. S. Budden                  *EasyColour-copyright*
 >
 		https://github.com/tpope/vim-pathogen
 <
+	(it's well worth it!)
+
 	If you've got pathogen installed, unzip the EasyColour zip file into your
 	pathogen bundles directory; nothing else needs to be done!
 
@@ -74,6 +78,22 @@ Copyright:  (c) 2011 by A. S. Budden                  *EasyColour-copyright*
 	To install without pathogen, simply unzip the EasyColour zip file into
 	your ~/.vim or vimfiles directory (depending on your platform).  In your
 	vimrc, select a colour scheme using the |colorscheme| command.
+
+2.2.3 Selecting a Colour Scheme        *EasyColour-load-scheme*             {{{3
+
+	To use a colour scheme that only supports one background colour, it should
+	be simply possible to add this to your vimrc (assuming you want the
+	desert_thl colour scheme):
+>
+		colorscheme desert_thl
+<
+	To use a colour scheme that supports both light and dark backgrounds (e.g.
+	the Bandit colour scheme, which is included in the distribution), put this
+	in your vimrc:
+>
+		set background=dark " Change to light if you want the light variant
+		colorscheme bandit  " Change to your preferred colour scheme
+<
 
 2.3 Simple Colour Schemes              *EasyColour-simple*                  {{{2
 
@@ -99,6 +119,8 @@ Copyright:  (c) 2011 by A. S. Budden                  *EasyColour-copyright*
 		* The name (near the end of the last line);
 		* If you want a dark background, replace "light" with "dark" on the
 		  first line.
+		* If you want the user to be able to specify either a light or dark
+		  background in their vimrc, remove the first line completely.
 
 	All of the colour customisation is done in my_colour_scheme.txt.  The
 	format of this is very simple.  An example is below:
@@ -166,8 +188,14 @@ Copyright:  (c) 2011 by A. S. Budden                  *EasyColour-copyright*
 	(as you need a hard tab at the start of some lines) and tells Vim it's an
 	EasyColour colour scheme so that it gets highlighted in its own colours.
 
-	There are some more examples in the "colors/" directory in the EasyColour
-	distribution.
+	It is also possible to make a light/dark colour scheme with only one set
+	specified.  EasyColour will try to guess the best colour for the other
+	version by making your chosen colours darker or lighter as appropriate.
+	See the bandit colour scheme in the "colors/" directory of the EasyColour
+	distribution for a good example of this.
+
+	There are some other examples in the "colors/" directory in the EasyColour
+	distribution as well.
 
 2.4 Format Reference                   *EasyColour-format*                  {{{2
 
