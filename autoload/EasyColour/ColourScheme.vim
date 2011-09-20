@@ -20,8 +20,18 @@ catch
 endtry
 let g:loaded_EasyColourColourScheme = 1
 
+
 function! EasyColour#ColourScheme#LoadColourScheme(name)
+	let command_list = EasyColour#ColourScheme#GetColourSchemeLoadCommands(a:name)
+	for command in command_list
+		exe command
+	endfor
+	let g:colors_name = a:name
+endfunction
+
+function! EasyColour#ColourScheme#GetColourSchemeLoadCommands(name)
 	let ColourScheme = EasyColour#LoadDataFile#LoadColourSpecification(a:name)
+	let command_list = []
 
 	if has_key(ColourScheme, 'Background')
 		let &background = tolower(ColourScheme['Background'])
@@ -30,7 +40,7 @@ function! EasyColour#ColourScheme#LoadColourScheme(name)
 	let has_basis = 0
 	if has_key(ColourScheme, 'Basis')
 		if ColourScheme['Basis'] != 'None'
-			exe 'runtime!' 'colors/' . ColourScheme['Basis'] . '.vim'
+			let command_list += ['runtime!' 'colors/' . ColourScheme['Basis'] . '.vim']
 			let has_basis = 1
 		endif
 	endif
@@ -76,11 +86,11 @@ function! EasyColour#ColourScheme#LoadColourScheme(name)
 				let ColourScheme[details]['Normal'] = ["Black","White"]
 			endif
 		endif
-		call s:StandardHandler(ColourScheme[details])
+		let command_list += s:StandardHandler(ColourScheme[details])
 	elseif handler == 'Auto'
-		call s:AutoHandler(ColourScheme, basis, details)
+		let command_list += s:AutoHandler(ColourScheme, basis, details)
 	endif
-	let g:colors_name = a:name
+	return command_list
 endfunction
 
 let s:gui_fields = {'FG': 'guifg', 'BG': 'guibg', 'Style': 'gui', 'SP': 'guisp'}
@@ -183,10 +193,11 @@ function! s:StandardHandler(Colours)
 			endif
 		endfor
 	endfor
-	call s:RunHighlighter(modified_colours)
+	return s:RunHighlighter(modified_colours)
 endfunction
 
 function! s:RunHighlighter(map)
+	let command_list = []
 	for hlgroup in ['EasyColourNormalForce'] + keys(a:map)
 		" Force Normal to be handled first...
 		if hlgroup == 'Normal'
@@ -203,9 +214,9 @@ function! s:RunHighlighter(map)
 		for field in keys(a:map[hlgroup])
 			let command .= ' ' . field . '=' . a:map[hlgroup][field]
 		endfor
-		"echo command
-		exe command
+		let command_list += [command]
 	endfor
+	return command_list
 endfunction
 
 function! s:AutoHandler(ColourScheme, basis, details)
@@ -266,5 +277,5 @@ function! s:AutoHandler(ColourScheme, basis, details)
 			endif
 		endfor
 	endfor
-	call s:RunHighlighter(modified_colours)
+	return s:RunHighlighter(modified_colours)
 endfunction
