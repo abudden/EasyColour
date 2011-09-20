@@ -202,7 +202,7 @@ function! s:RunHighlighter(map)
 		for field in keys(a:map[hlgroup])
 			let command .= ' ' . field . '=' . a:map[hlgroup][field]
 		endfor
-		echo command
+		"echo command
 		exe command
 	endfor
 endfunction
