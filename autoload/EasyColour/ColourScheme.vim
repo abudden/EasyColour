@@ -214,8 +214,8 @@ function! s:AutoHandler(ColourScheme, basis, details)
 	let colour_map = s:GetColourMap()
 
 	" Get override map
-	if has_key(ColourScheme, a:details . 'Override')
-		let override_map = s:GenerateColourMap(ColourScheme[a:details . 'Override'])
+	if has_key(a:ColourScheme, a:details . 'Override')
+		let override_map = s:GenerateColourMap(a:ColourScheme[a:details . 'Override'])
 	else
 		let override_map = {}
 	endif
@@ -250,7 +250,7 @@ function! s:AutoHandler(ColourScheme, basis, details)
 
 				" Now have a look for any overrides
 				let override_key = a:details . 'Override'
-				if has_key(override_map, hlgroup) && has_key(override_map[hlgroup][field])
+				if has_key(override_map, hlgroup) && has_key(override_map[hlgroup], field)
 					let modified_colour = override_map[hlgroup][field]
 				endif
 
