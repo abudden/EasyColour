@@ -80,7 +80,7 @@ function! s:CalculateAvailableRGBColours()
 	let s:available_rgb_colours['CT256'] = {}
 
 	" 88/256 Colour Table consists of 16 colours as CT16,
-	" A cube of 6x6x6 colours and then a selection
+	" a cube of 6x6x6 colours and then a selection
 	" of greys.
 	for c in range(len(s:available_colours['CT16']))
 		let s:available_rgb_colours['CT256'][c] = s:available_rgb_colours['CT16'][s:available_colours['CT16'][c]]
