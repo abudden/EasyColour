@@ -70,15 +70,13 @@ endfunction
 
 let s:gui_fields = {'FG': 'guifg', 'BG': 'guibg', 'Style': 'gui', 'SP': 'guisp'}
 let s:cterm_fields = {'FG': 'ctermfg', 'BG': 'ctermbg', 'Style': 'cterm'}
-let s:all_cterm_fields = ['ctermfg', 'ctermbg', 'term']
-let s:all_gui_fields = ['guifg', 'guibg', 'gui', 'guisp']
+let s:all_fields = ['guifg', 'guibg', 'gui', 'guisp', 'ctermfg', 'ctermbg', 'cterm', "term", "font"]
 let s:field_order = ["FG","BG","SP","Style"]
 
 function! s:StandardHandler(Colours)
 	if has("gui_running")
 		let colour_map = 'None'
 		let field_map = s:gui_fields
-		let all_fields = s:all_gui_fields
 	else
 		if &t_Co == 256
 			let colour_map = 'CT256'
@@ -90,7 +88,6 @@ function! s:StandardHandler(Colours)
 			echoerr "Unrecognised terminal colour count"
 		endif
 		let field_map = s:cterm_fields
-		let all_fields = s:all_cterm_fields
 	endif
 
 	for hlgroup in ['EasyColourNormalForce'] + keys(a:Colours)
@@ -146,7 +143,7 @@ function! s:StandardHandler(Colours)
 			let command .= ' ' . field . '=' . colour
 			let index += 1
 		endfor
-		for field in all_fields
+		for field in s:all_fields
 			if index(handled, field) == -1
 				let command .= ' ' . field . '=NONE'
 			endif
