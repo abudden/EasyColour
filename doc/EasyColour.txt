@@ -147,13 +147,20 @@ Copyright:  (c) 2011 by A. S. Budden                  *EasyColour-copyright*
 
 		* Foreground Colour
 		* Background Colour
-		* Special Colour (the colour of underlines etc)
+		* Special Colour (the colour of undercurls)
 		* Style (choose from 'Underline', 'Undercurl', 'Bold' etc)
 	
 	So the line 'Error:Yellow,Red' will make errors be shown as yellow text on
 	a red background.  There are other ways to define colours as well; these
 	are detailed in |EasyColour-format|.
-	
+
+	The special colour is treated slightly differently in non-GUI Vim.  It is
+	usually set in order to specify the colour of an undercurl.  However, in
+	non-GUI Vim, undercurls are not supported and they are replaced with an
+	underline in the foreground colour.  Therefore, the 'special colour' is
+	used as the foreground colour in non-GUI Vim unless the foreground colour
+	is set explicitly (in which case it is ignored).
+
 	The last line in the file is a Vim |modeline| that keeps the file format
 	as Unix (so it works on Linux and Windows), ensures tabs are not expanded
 	(as you need a hard tab at the start of some lines) and tells Vim it's an

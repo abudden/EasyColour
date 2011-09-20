@@ -69,7 +69,7 @@ function! EasyColour#ColourScheme#LoadColourScheme(name)
 endfunction
 
 let s:gui_fields = {'FG': 'guifg', 'BG': 'guibg', 'Style': 'gui', 'SP': 'guisp'}
-let s:cterm_fields = {'FG': 'ctermfg', 'BG': 'ctermbg', 'Style': 'cterm'}
+let s:cterm_fields = {'FG': 'ctermfg', 'BG': 'ctermbg', 'Style': 'cterm', 'SP': 'ctermfg'}
 let s:all_fields = ['guifg', 'guibg', 'gui', 'guisp', 'ctermfg', 'ctermbg', 'cterm', "term", "font"]
 let s:field_order = ["FG","BG","SP","Style"]
 
@@ -113,6 +113,7 @@ function! s:StandardHandler(Colours)
 		endif
 
 		let command = 'hi ' . hlgroup
+		let highlight_map = {}
 		let index = 0
 		let handled = []
 		for part in group_colours
@@ -139,9 +140,18 @@ function! s:StandardHandler(Colours)
 				let colour = EasyColour#Translate#FindNearest(colour_map, colour_name)
 			endif
 
-			let handled += [field]
-			let command .= ' ' . field . '=' . colour
+			if internal_name == 'SP' && field != 'guisp' && has_key(highlight_map, field)
+				" Skip this as we're probably in a terminal Vim,
+				" so guisp is meaningless and the mapped entry
+				" has already been set.
+			else
+				let handled += [field]
+				let highlight_map[field] = colour
+			endif
 			let index += 1
+		endfor
+		for field in keys(highlight_map)
+			let command .= ' ' . field . '=' . highlight_map[field]
 		endfor
 		for field in s:all_fields
 			if index(handled, field) == -1
