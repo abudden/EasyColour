@@ -34,7 +34,17 @@ function! EasyColour#ColourScheme#LoadColourScheme(name)
 			let has_basis = 1
 		endif
 	endif
-	let g:colors_name = a:name
+
+	let auto_colour = 0
+	if has_key(ColourScheme, 'DarkAuto') && has_key(ColourScheme, 'Light') && &background == 'dark'
+		if index(['1', 'true'], tolower(ColourScheme['DarkAuto'])) != -1
+			let auto_colour = 1
+		endif
+	elseif has_key(ColourScheme, 'LightAuto') && has_key(ColourScheme, 'Dark') && &background == 'light'
+		if index(['1', 'true'], tolower(ColourScheme['LightAuto'])) != -1
+			let auto_colour = 1
+		endif
+	endif
 
 	if has_key(ColourScheme, 'Dark') && &background == 'dark'
 		let details = 'Dark'
@@ -42,13 +52,17 @@ function! EasyColour#ColourScheme#LoadColourScheme(name)
 	elseif has_key(ColourScheme, 'Light') && &background == 'light'
 		let details = 'Light'
 		let handler = 'Standard'
-	elseif has_key(ColourScheme, 'Dark') && &background == 'light'
+	elseif auto_colour == 1 && &background == 'light'
 		" These checks may need to be made more complicated
 		" to include checking of LightAuto etc
+		let details = 'Light'
+		let basis = 'Dark'
 		let handler = 'Auto'
-	elseif has_key(ColourScheme, 'Light') && &background == 'dark'
+	elseif auto_colour == 1 && &background == 'dark'
 		" These checks may need to be made more complicated
 		" to include checking of DarkAuto etc
+		let details = 'Dark'
+		let basis = 'Light'
 		let handler = 'Auto'
 	else
 		echoerr "No colour customisations defined"
@@ -64,19 +78,19 @@ function! EasyColour#ColourScheme#LoadColourScheme(name)
 		endif
 		call s:StandardHandler(ColourScheme[details])
 	elseif handler == 'Auto'
-		call s:AutoHandler(ColourScheme)
+		call s:AutoHandler(ColourScheme, basis, details)
 	endif
+	let g:colors_name = a:name
 endfunction
 
 let s:gui_fields = {'FG': 'guifg', 'BG': 'guibg', 'Style': 'gui', 'SP': 'guisp'}
 let s:cterm_fields = {'FG': 'ctermfg', 'BG': 'ctermbg', 'Style': 'cterm', 'SP': 'ctermfg'}
-let s:all_fields = ['guifg', 'guibg', 'gui', 'guisp', 'ctermfg', 'ctermbg', 'cterm', "term", "font"]
+let s:all_fields = {'guifg': 'FG', 'guibg': 'BG', 'gui': 'Style', 'guisp': 'SP', 'ctermfg': 'FG', 'ctermbg': 'BG', 'cterm': 'Style', "term": 'Style', "font": 'None'}
 let s:field_order = ["FG","BG","SP","Style"]
 
-function! s:StandardHandler(Colours)
+function! s:GetColourMap()
 	if has("gui_running")
 		let colour_map = 'None'
-		let field_map = s:gui_fields
 	else
 		if &t_Co == 256
 			let colour_map = 'CT256'
@@ -87,21 +101,18 @@ function! s:StandardHandler(Colours)
 		else
 			echoerr "Unrecognised terminal colour count"
 		endif
+	endif
+endfunction
+
+function! s:GenerateColourMap(Colours)
+	if has("gui_running")
+		let field_map = s:gui_fields
+	else
 		let field_map = s:cterm_fields
 	endif
 
-	for hlgroup in ['EasyColourNormalForce'] + keys(a:Colours)
-		" Force Normal to be handled first...
-		if hlgroup == 'Normal'
-			continue
-		elseif hlgroup == 'EasyColourNormalForce'
-			if has_key(a:Colours, 'Normal')
-				let hlgroup = 'Normal'
-			else
-				continue
-			endif
-		endif
-
+	let field_colour_map = {}
+	for hlgroup in keys(a:Colours)
 		if hlgroup !~ '^\k*$'
 			echoerr "Invalid highlight group: '" . hlgroup . "'"
 		endif
@@ -112,7 +123,6 @@ function! s:StandardHandler(Colours)
 			let group_colours = [a:Colours[hlgroup]]
 		endif
 
-		let command = 'hi ' . hlgroup
 		let highlight_map = {}
 		let index = 0
 		let handled = []
@@ -134,36 +144,126 @@ function! s:StandardHandler(Colours)
 			endif
 			let field = field_map[internal_name]
 
-			if colour_map == 'None' || internal_name == 'Style'
-				let colour = colour_name
-			else
-				let colour = EasyColour#Translate#FindNearest(colour_map, colour_name)
-			endif
-
 			if internal_name == 'SP' && field != 'guisp' && has_key(highlight_map, field)
 				" Skip this as we're probably in a terminal Vim,
 				" so guisp is meaningless and the mapped entry
 				" has already been set.
 			else
 				let handled += [field]
-				let highlight_map[field] = colour
+				let highlight_map[field] = colour_name
 			endif
 			let index += 1
 		endfor
-		for field in keys(highlight_map)
-			let command .= ' ' . field . '=' . highlight_map[field]
-		endfor
-		for field in s:all_fields
+		for field in keys(s:all_fields)
 			if index(handled, field) == -1
-				let command .= ' ' . field . '=NONE'
+				let highlight_map[field] = 'NONE'
 			endif
 		endfor
+		let field_colour_map[hlgroup] = highlight_map
+	endfor
+	return field_colour_map
+endfunction
 
-		"echo command
+function! s:StandardHandler(Colours)
+	let field_colour_map = s:GenerateColourMap(a:Colours)
+	let colour_map = s:GetColourMap()
+
+	let modified_colours = {}
+	for hlgroup in keys(field_colour_map)
+		let modified_colours[hlgroup] = {}
+		for field in keys(field_colour_map[hlgroup])
+			if colour_map == 'None' || s:all_fields[field] == 'Style'
+				let modified_colours[hlgroup][field] = field_colour_map[hlgroup][field]
+			elseif field_colour_map[hlgroup][field] == 'NONE'
+				let modified_colours[hlgroup][field] = 'NONE'
+			else
+				let modified_colours[hlgroup][field] = 
+							\ EasyColour#Translate#FindNearest(colour_map, field_colour_map[hlgroup][field])
+			endif
+		endfor
+	endfor
+	call s:RunHighlighter(modified_colours)
+endfunction
+
+function! s:RunHighlighter(map)
+	for hlgroup in ['EasyColourNormalForce'] + keys(a:map)
+		" Force Normal to be handled first...
+		if hlgroup == 'Normal'
+			continue
+		elseif hlgroup == 'EasyColourNormalForce'
+			if has_key(a:map, 'Normal')
+				let hlgroup = 'Normal'
+			else
+				continue
+			endif
+		endif
+
+		let command = 'hi ' . hlgroup
+		for field in keys(a:map[hlgroup])
+			let command .= ' ' . field . '=' . a:map[hlgroup][field]
+		endfor
+		echo command
 		exe command
 	endfor
 endfunction
 
-function! s:AutoHandler(ColourScheme)
-	echoerr "Not implemented yet"
+function! s:AutoHandler(ColourScheme, basis, details)
+	let standard_field_colour_map = s:GenerateColourMap(a:ColourScheme[a:basis])
+	" We'll assume that automatic generation has been enabled
+	" (it's checked above)
+	let colour_map = s:GetColourMap()
+
+	" Get override map
+	if has_key(ColourScheme, a:details . 'Override')
+		let override_map = s:GenerateColourMap(ColourScheme[a:details . 'Override'])
+	else
+		let override_map = {}
+	endif
+	
+	" First, make colours darker or lighter as appropriate
+	let modified_colours = {}
+	for hlgroup in keys(standard_field_colour_map)
+		let modified_colours[hlgroup] = {}
+		for field in keys(standard_field_colour_map[hlgroup])
+			if s:all_fields[field] == 'Style'
+				" Don't modify style hints
+				let modified_colours[hlgroup][field] = standard_field_colour_map[hlgroup][field]
+				continue
+			elseif standard_field_colour_map[hlgroup][field] == 'NONE'
+				" Don't modify those specified as NONE
+				let modified_colours[hlgroup][field] = 'NONE'
+				continue
+			elseif hlgroup == 'Normal'
+				" Do a complete colour invert on normal
+				let std_colour = EasyColour#Translate#GetHexColour(standard_field_colour_map[hlgroup][field])
+				let modified_colours[hlgroup][field] = EasyColour#Shade#Invert(std_colour)
+			else
+				let std_colour = EasyColour#Translate#GetHexColour(standard_field_colour_map[hlgroup][field])
+				" Modify the colour if it's too dark or too light
+				if a:details == 'Dark'
+					let modified_colour = EasyColour#Shade#LightBGToDarkBG(std_colour)
+				elseif a:details == 'Light'
+					let modified_colour = EasyColour#Shade#DarkBGToLightBG(std_colour)
+				else
+					echoerr "Parameter passed incorrectly: something's gone very wrong!"
+				endif
+
+				" Now have a look for any overrides
+				let override_key = a:details . 'Override'
+				if has_key(override_map, hlgroup) && has_key(override_map[hlgroup][field])
+					let modified_colour = override_map[hlgroup][field]
+				endif
+
+				if colour_map == 'None' || s:all_fields[field] == 'Style'
+					let modified_colours[hlgroup][field] = modified_colour
+				elseif modified_colours[hlgroup][field] == 'NONE'
+					" Leave as is
+				else
+					let modified_colours[hlgroup][field] = 
+								\ EasyColour#Translate#FindNearest(colour_map, modified_colour)
+				endif
+			endif
+		endfor
+	endfor
+	call s:RunHighlighter(modified_colours)
 endfunction

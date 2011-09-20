@@ -125,7 +125,7 @@ function! s:CalculateAvailableRGBColours()
 endfunction
 
 function! s:LoadRGBMap()
-	let rgb_files = split(globpath(&rtp, 'rgb.txt'),',')
+	let rgb_files = split(globpath(&rtp, 'rgb.txt'),"\n")
 	if len(rgb_files) < 1
 		echoerr "Could not find rgb.txt"
 	endif
@@ -153,8 +153,31 @@ function! s:LoadRGBMap()
 	let s:loaded_rgb_map = 1
 endfunction
 
-function! s:RGBToHex(colour)
-	return printf('#%02X%02X%02X', a:colour[0], a:colour[1], a:colour[2])
+function! EasyColour#Translate#HexToRGB(hex)
+	let rgbSplitter = '^#\(\x\{2}\)\(\x\{2}\)\(\x\{2}\)$'
+	let matches = matchlist(a:hex, rgbSplitter)
+	return [str2nr(matches[1],16),str2nr(matches[2],16),str2nr(matches[3],16)]
+endfunction
+
+function! EasyColour#Translate#RGBToHex(rgb)
+	return printf('#%02X%02X%02X', a:rgb[0],a:rgb[1],a:rgb[2])
+endfunction
+
+
+function! EasyColour#Translate#GetHexColour(colour)
+	if ! s:loaded_rgb_map
+		call s:LoadRGBMap()
+	endif
+	let colour_name = tolower(a:colour)
+	if colour_name =~ '^#\x\{6}$'
+		return colour_name
+	elseif has_key(s:RGBMap, colour_name)
+		return EasyColour#Translate#RGBToHex(s:RGBMap[colour_name])
+	elseif has_key(s:missing_colour_map, colour_name)
+		return EasyColour#Translate#RGBToHex(s:RGBMap[s:missing_colour_map[colour_name]])
+	else
+		echoerr "Unrecognised colour (GetHexColour): '" . a:colour . "'"
+	endif
 endfunction
 
 function! EasyColour#Translate#FindNearest(subset, colour)
