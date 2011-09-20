@@ -181,7 +181,7 @@ function! EasyColour#Translate#FindNearest(subset, colour)
 			let closest_colour = subset_colour
 		endif
 	endfor
-	return [min_distance, closest_colour]
+	return closest_colour
 endfunction
 
 function! s:ColourDistance(colour1, colour2)

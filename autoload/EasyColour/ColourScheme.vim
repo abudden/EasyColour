@@ -69,10 +69,30 @@ function! EasyColour#ColourScheme#LoadColourScheme(name)
 endfunction
 
 let s:gui_fields = {'FG': 'guifg', 'BG': 'guibg', 'Style': 'gui', 'SP': 'guisp'}
+let s:cterm_fields = {'FG': 'ctermfg', 'BG': 'ctermbg', 'Style': 'term'}
+let s:all_cterm_fields = ['ctermfg', 'ctermbg', 'term']
 let s:all_gui_fields = ['guifg', 'guibg', 'gui', 'guisp']
 let s:field_order = ["FG","BG","SP","Style"]
 
 function! s:StandardHandler(Colours)
+	if has("gui_running")
+		let colour_map = 'None'
+		let field_map = s:gui_fields
+		let all_fields = s:all_gui_fields
+	else
+		if &t_Co == 256
+			let colour_map = 'CT256'
+		elseif &t_Co == 16
+			let colour_map = 'CT16'
+		elseif &t_Co == 8
+			let colour_map = 'CT8'
+		else
+			echoerr "Unrecognised terminal colour count"
+		endif
+		let field_map = s:cterm_fields
+		let all_fields = s:all_cterm_fields
+	endif
+
 	for hlgroup in ['EasyColourNormalForce'] + keys(a:Colours)
 		" Force Normal to be handled first...
 		if hlgroup == 'Normal'
@@ -89,42 +109,48 @@ function! s:StandardHandler(Colours)
 			echoerr "Invalid highlight group: '" . hlgroup . "'"
 		endif
 
-		if has("gui_running")
-			if type(a:Colours[hlgroup]) == type([])
-				let group_colours = a:Colours[hlgroup]
-			else
-				let group_colours = [a:Colours[hlgroup]]
-			endif
-			let command = 'hi ' . hlgroup
-			let index = 0
-			let handled = []
-			for part in group_colours
-				if stridx(part, '=') != -1
-					let definition = split(part, '=')
-					if has_key(s:gui_fields, definition[0])
-						let field = s:gui_fields[definition[0]]
-					else
-						echoerr "Unrecognised field: '" . definition[0] . "' with entry '" . hlgroup . "'"
-					endif
-					let colour = definition[1]
-				else
-					let field = s:gui_fields[s:field_order[index]]
-					" This will be more complicated for non-GUI versions!
-					let colour = part
-				endif
-
-				let handled += [field]
-				let command .= ' ' . field . '=' . colour
-				let index += 1
-			endfor
-			for field in s:all_gui_fields
-				if index(handled, field) == -1
-					let command .= ' ' . field . '=NONE'
-				endif
-			endfor
+		if type(a:Colours[hlgroup]) == type([])
+			let group_colours = a:Colours[hlgroup]
 		else
-			echoerr "Terminal implementation not complete yet, sorry!"
+			let group_colours = [a:Colours[hlgroup]]
 		endif
+
+		let command = 'hi ' . hlgroup
+		let index = 0
+		let handled = []
+		for part in group_colours
+			if stridx(part, '=') != -1
+				let definition = split(part, '=')
+				if has_key(field_map, definition[0])
+					let internal_name = definition[0]
+				elseif index(s:field_order, definition[0])
+					" Probably supported by GUI and not CTERM... skip silently
+					continue
+				else
+					echoerr "Unrecognised field: '" . definition[0] . "' with entry '" . hlgroup . "'"
+				endif
+				let colour_name = definition[1]
+			else
+				let internal_name = s:field_order[index]
+				let colour_name = part
+			endif
+			let field = field_map[internal_name]
+
+			if colour_map == 'None' || internal_name == 'Style'
+				let colour = colour_name
+			else
+				let colour = EasyColour#Translate#FindNearest(colour_map, colour_name)
+			endif
+
+			let handled += [field]
+			let command .= ' ' . field . '=' . colour
+			let index += 1
+		endfor
+		for field in all_fields
+			if index(handled, field) == -1
+				let command .= ' ' . field . '=NONE'
+			endif
+		endfor
 
 		"echo command
 		exe command
