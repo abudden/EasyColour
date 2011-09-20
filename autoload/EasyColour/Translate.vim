@@ -25,37 +25,39 @@ let s:loaded_rgb_map = 0
 let s:calculated_available_colours = 0
 
 " 88 Colour and 256 Colour terminals are calculated on the fly
+
+" 8/16 Colours taken from /etc/X11/app-defaults/XTerm-color
 let s:available_colours = 
 			\ {
 			\     'CT8': 
 			\         [
-			\             'Black',
-			\             'DarkBlue',
-			\             'DarkGreen',
-			\             'DarkCyan',
-			\             'DarkRed',
-			\             'DarkMagenta',
-			\             'Brown',
-			\             'Grey',
+			\             'black',
+			\             'red3',
+			\             'green3',
+			\             'yellow3',
+			\             'blue2',
+			\             'magenta3',
+			\             'cyan3',
+			\             'grey90',
 			\         ],
 			\     'CT16':
 			\         [
-			\             'Black',
-			\             'DarkBlue',
-			\             'DarkGreen',
-			\             'DarkCyan',
-			\             'DarkRed',
-			\             'DarkMagenta',
-			\             'Brown',
-			\             'Grey',
-			\             'DarkGrey',
-			\             'Blue',
-			\             'Green',
-			\             'Cyan',
-			\             'Red',
-			\             'Magenta',
-			\             'Yellow',
-			\             'White',
+			\             'black',
+			\             'red3',
+			\             'green3',
+			\             'yellow3',
+			\             'blue2',
+			\             'magenta3',
+			\             'cyan3',
+			\             'grey90',
+			\             'grey50',
+			\             'red',
+			\             'green',
+			\             'yellow',
+			\             '#5C5CFF',
+			\             'magenta',
+			\             'cyan',
+			\             'white',
 			\         ],
 			\ }
 
@@ -73,7 +75,17 @@ function! s:CalculateAvailableRGBColours()
 	for k in ['CT8', 'CT16']
 		let s:available_rgb_colours[k] = {}
 		for colour in s:available_colours[k]
-			let s:available_rgb_colours[k][colour] = s:RGBMap[tolower(colour)]
+			let colour_key = tolower(colour)
+			if colour_key =~ '^#\x\{6}$'
+				let std_rgb_colour = [str2nr(colour_key[1:2], 16), str2nr(colour_key[3:4], 16), str2nr(colour_key[5:6], 16)]
+			elseif has_key(s:RGBMap, colour_key)
+				let std_rgb_colour = s:RGBMap[colour_key]
+			elseif has_key(s:missing_colour_map, colour_key)
+				let std_rgb_colour = s:RGBMap[s:missing_colour_map[colour_key]]
+			else
+				echoerr "Unrecognised standard colour: '" . colour . "'"
+			endif
+			let s:available_rgb_colours[k][colour] = std_rgb_colour
 		endfor
 	endfor
 
