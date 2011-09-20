@@ -53,6 +53,7 @@ Dark:
 	StatusLine:Black,LightGrey
 	StatusLineNC:Black,DarkGrey
 	VertSplit:Black,White
+	SpellBad:Style=Undercurl,SP=Red
 	SignColumn:BG=#222222
 	Title:Blue,Style=Bold
 	htmlH1:Blue
