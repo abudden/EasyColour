@@ -40,7 +40,7 @@ function! EasyColour#ColourScheme#GetColourSchemeLoadCommands(name)
 	let has_basis = 0
 	if has_key(ColourScheme, 'Basis')
 		if ColourScheme['Basis'] != 'None'
-			let command_list += ['runtime!' 'colors/' . ColourScheme['Basis'] . '.vim']
+			let command_list += ['runtime! ' . 'colors/' . ColourScheme['Basis'] . '.vim']
 			let has_basis = 1
 		endif
 	endif
