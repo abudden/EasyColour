@@ -216,7 +216,11 @@ function! EasyColour#Translate#FindNearest(subset, colour)
 			let closest_colour = subset_colour
 		endif
 	endfor
-	return closest_colour
+	if index(['CT8','CT16'], a:subset) != -1
+		return index(s:available_colours[a:subset], closest_colour)
+	else
+		return closest_colour
+	endif
 endfunction
 
 function! s:ColourDistance(colour1, colour2)
