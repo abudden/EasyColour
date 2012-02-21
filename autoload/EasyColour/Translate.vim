@@ -22,7 +22,18 @@ let g:loaded_EasyColourTranslate = 1
 
 let s:RGBMap = {}
 let s:loaded_rgb_map = 0
+let s:loaded_colour_cache = 0
 let s:calculated_available_colours = 0
+
+let s:plugin_paths = split(globpath(&rtp, 'autoload/EasyColour/Translate.vim'), '\n')
+if len(s:plugin_paths) == 1
+	let s:plugin_path = fnamemodify(s:plugin_paths[0], ':p:h:h:h')
+elseif len(s:plugin_paths) == 0
+	echoerr "Cannot find Translate.vim"
+else
+	echoerr "Multiple plugin installs found: something has gone wrong!"
+endif
+let s:cache_file = s:plugin_path . '/easycolour_cache.txt'
 
 " 88 Colour and 256 Colour terminals are calculated on the fly
 
@@ -153,6 +164,37 @@ function! s:LoadRGBMap()
 	let s:loaded_rgb_map = 1
 endfunction
 
+function! s:LoadColourCache()
+	let s:ColourCache = {}
+	let s:loaded_colour_cache = 1
+	if ! filereadable(s:cache_file)
+		return
+	endif
+	let mainkey = 'NO_KEY_FOUND'
+	for line in readfile(s:cache_file)
+		if line[0] == '\t' && mainkey != 'NO_KEY_FOUND'
+			let parts = split(line[1:], ':')
+			let s:ColourCache[mainkey][parts[0]] = parts[1]
+		elseif len(line) > 0
+			let mainkey = line
+			if ! has_key(s:ColourCache, mainkey)
+				let s:ColourCache[mainkey] = {}
+			endif
+		endif
+	endfor
+endfunction
+
+function! EasyColour#Translate#WriteColourCache()
+	let lines = []
+	for key in keys(s:ColourCache)
+		let lines += [key]
+		for subkey in keys(s:ColourCache[key])
+			let lines += ["\t" . subkey . ':' . s:ColourCache[key][subkey]]
+		endfor
+	endfor
+	call writefile(lines, s:cache_file)
+endfunction
+
 function! EasyColour#Translate#HexToRGB(hex)
 	let rgbSplitter = '^#\(\x\{2}\)\(\x\{2}\)\(\x\{2}\)$'
 	let matches = matchlist(a:hex, rgbSplitter)
@@ -181,6 +223,18 @@ function! EasyColour#Translate#GetHexColour(colour)
 endfunction
 
 function! EasyColour#Translate#FindNearest(subset, colour)
+	if ! s:loaded_colour_cache
+		call s:LoadColourCache()
+	endif
+
+	if has_key(s:ColourCache, a:subset)
+		if has_key(s:ColourCache[a:subset], a:colour)
+			return s:ColourCache[a:subset][a:colour]
+		endif
+	else
+		let s:ColourCache[a:subset] = {}
+	endif
+
 	if ! s:calculated_available_colours
 		call s:CalculateAvailableRGBColours()
 	endif
@@ -217,10 +271,12 @@ function! EasyColour#Translate#FindNearest(subset, colour)
 		endif
 	endfor
 	if index(['CT8','CT16'], a:subset) != -1
-		return index(s:available_colours[a:subset], closest_colour)
+		let result = index(s:available_colours[a:subset], closest_colour)
 	else
-		return closest_colour
+		let result =  closest_colour
 	endif
+	let s:ColourCache[a:subset][a:colour] = result
+	return result
 endfunction
 
 function! s:ColourDistance(colour1, colour2)
