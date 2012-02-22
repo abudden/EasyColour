@@ -113,6 +113,8 @@ Copyright:  (c) 2011 by A. S. Budden                  *EasyColour-copyright*
 			syntax reset
 		endif
 		call EasyColour#ColourScheme#LoadColourScheme('my_colour_scheme')
+
+		" vim: ff=unix
 <
 	The ONLY things you'll need to change for your colour scheme are:
 		
@@ -207,7 +209,7 @@ Copyright:  (c) 2011 by A. S. Budden                  *EasyColour-copyright*
 	for |group-name|.  |TagHighlight| adds lots more depending on the programming
 	language that you're using.  See |TagHighlight-language-colours| for
 	details on how to find the list of highlight groups for your programming
-	language.
+	language (assuming you've installed |TagHighlight|).
 
 ==============================================================================
 3. EasyColour History                  *EasyColour-history*                 {{{1
