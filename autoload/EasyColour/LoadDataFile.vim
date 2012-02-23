@@ -45,8 +45,10 @@ function! s:LoadFile(filename)
 		if entry[0] == '#'
 			" Comment: ignore
 		elseif entry[0] =~ '\k'
-			" Keyword character first, so not sub entry or comment
-			if entry[len(entry)-1:] == ":"
+			" Keyword character first, so not sub entry or top-levelcomment
+			if entry[1] == '#'
+				" Comment: ignore
+			elseif entry[len(entry)-1:] == ":"
 				" Beginning of a field, but we don't know whether
 				" it's a list of a dict yet
 				let top_key = entry[:len(entry)-2]
