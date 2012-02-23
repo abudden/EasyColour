@@ -74,8 +74,8 @@ def GenerateVersionInfo():
 def MakeMainRelease(r):
     # List of paths to include (either explicit files or paths to search)
     paths = {
-            '.vim': ['ftplugin/EasyColour.vim','autoload/EasyColour','syntax/EasyColour.vim','colors/easycolour_sample.vim'],
-            '.txt': ['autoload/EasyColour', 'doc/EasyColour.txt'],
+            '.vim': ['ftplugin/EasyColour.vim','autoload/EasyColour','syntax/EasyColour.vim','colors'],
+            '.txt': ['autoload/EasyColour', 'doc/EasyColour.txt', 'colors'],
             }
     filename = 'easycolour_r{0}.zip'.format(r)
     MakeZipFile(filename, paths)
@@ -108,6 +108,26 @@ def MakeZipFile(filename, paths):
     # Close the zipfile
     zipf.close()
 
+def UpdateToLatest():
+    args = GIT + ['checkout', 'origin/master']
+    p = subprocess.Popen(args)
+    (stdout,stderr) = p.communicate()
+
+def CheckInChanges(r):
+    args = GIT+['add','autoload/EasyColour/release.txt']
+    p = subprocess.Popen(args)
+    (stdout,stderr) = p.communicate()
+    args = GIT+['commit','-m','Release build {0}'.format(r)]
+    p = subprocess.Popen(args)
+    (stdout,stderr) = p.communicate()
+    args = GIT+['tag','taghighlight-release-{0}'.format(r)]
+    p = subprocess.Popen(args)
+    (stdout,stderr) = p.communicate()
+    args = GIT+['push','origin','master','--tags']
+    p = subprocess.Popen(args)
+    (stdout,stderr) = p.communicate()
+
+
 def PublishReleaseVersion():
     # TODO
     # This function will be used to push generated files to a remote location
@@ -115,6 +135,7 @@ def PublishReleaseVersion():
     pass
 
 def main():
+    UpdateToLatest()
     version_file, clean = GenerateVersionInfo()
 
     if clean:
