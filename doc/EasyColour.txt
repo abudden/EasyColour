@@ -397,7 +397,7 @@ Copyright:  (c) 2011-2012 by A. S. Budden                  *EasyColour-copyright
 ==============================================================================
 3. EasyColour History                  *EasyColour-history*                 {{{1
 
-0.0.1:  XXXX XXXXXXXXX 2011    : ...
+1.0.0:  23rd February 2012     : First public release.
 
 ==============================================================================
 Modelines: {{{1
