@@ -3,7 +3,7 @@
 Author:     A. S. Budden <abuddenNOSPAM@NOSPAMgmail.com>
 			Remove NOSPAM.
 
-Copyright:  (c) 2011 by A. S. Budden                  *EasyColour-copyright*
+Copyright:  (c) 2011-2012 by A. S. Budden                  *EasyColour-copyright*
             Permission is hereby granted to use and distribute this code,
             with or without modifications, provided that this copyright
             notice is copied with it. Like anything else that's free,
@@ -49,14 +49,23 @@ Copyright:  (c) 2011 by A. S. Budden                  *EasyColour-copyright*
 	distinguishing between them more clearly.
 
 	EasyColour also allows you to 'scratch an itch': change a little detail on
-	an existing colour scheme.  For example, if you really like the "desert"
-	colour scheme but want the comments to be green, that can be done very
-	easily!
-
+	an existing colour scheme.  For example, if you really like the (dark
+	background) "desert" colour scheme but want the comments to be green, that
+	can be done very easily:
+>
+		Basis:desert
+		Dark:
+			Comments:Green
+<
 	Finally, if you want to create a new colour scheme from scratch, it's much
 	easier with EasyColour: it'll even work out the best colours to use in a
 	(reduced colour range) terminal window so you only have to choose the
-	colours once (it supports 8, 16 and 256 colour terminals).
+	colours once (it supports 8, 16 and 256 colour terminals).  The first time
+	you load the colour scheme, the nearest available colours will be
+	calculated and then these will be cached so that the calculations don't
+	slow down Vim's start-up.
+
+------------------------------------------------------------------------------
 
 2.2 Installation                       *EasyColour-install*                 {{{2
 
@@ -71,13 +80,12 @@ Copyright:  (c) 2011 by A. S. Budden                  *EasyColour-copyright*
 	(it's well worth it!)
 
 	If you've got pathogen installed, unzip the EasyColour zip file into your
-	pathogen bundles directory; nothing else needs to be done!
+	pathogen bundles directory.
 
-2.2.1 Without Pathogen                 *EasyColour-install-no-pathogen*     {{{3
+2.2.2 Without Pathogen                 *EasyColour-install-no-pathogen*     {{{3
 
 	To install without pathogen, simply unzip the EasyColour zip file into
-	your ~/.vim or vimfiles directory (depending on your platform).  In your
-	vimrc, select a colour scheme using the |colorscheme| command.
+	your ~/.vim or vimfiles directory (depending on your platform).
 
 2.2.3 Selecting a Colour Scheme        *EasyColour-load-scheme*             {{{3
 
@@ -94,6 +102,27 @@ Copyright:  (c) 2011 by A. S. Budden                  *EasyColour-copyright*
 		set background=dark " Change to light if you want the light variant
 		colorscheme bandit  " Change to your preferred colour scheme
 <
+2.2.4 Uninstalling EasyColour          *EasyColour-uninstall*               {{{3
+
+	If you're using pathogen, EasyColour can be uninstalled by deleting the
+	EasyColour directory in your pathogen bundles directory.
+
+	If you're not using pathogen, the following files need to be deleted to
+	uninstall EasyColour (all relative to ~/.vim or your vimfiles directory
+	depending on platform):
+
+		* autoload/EasyColour (entire directory)
+		* doc/EasyColour.txt
+		* ftplugin/EasyColour.vim
+		* syntax/EasyColour.vim
+		* colors/bandit.txt
+		* colors/bandit.vim
+		* colors/default_modified.txt
+		* colors/default_modified.vim
+		* colors/desert_thl.txt
+		* colors/desert_thl.vim
+
+------------------------------------------------------------------------------
 
 2.3 Simple Colour Schemes              *EasyColour-simple*                  {{{2
 
@@ -107,7 +136,6 @@ Copyright:  (c) 2011 by A. S. Budden                  *EasyColour-copyright*
 
 	my_colour_scheme.vim should look like this:
 >
-		set background=light
 		hi clear
 		if exists("syntax_on")
 			syntax reset
@@ -116,14 +144,9 @@ Copyright:  (c) 2011 by A. S. Budden                  *EasyColour-copyright*
 
 		" vim: ff=unix
 <
-	The ONLY things you'll need to change for your colour scheme are:
+	The ONLY thing you'll need to change for your colour scheme is the name
+	(near the end of the last line).
 		
-		* The name (near the end of the last line);
-		* If you want a dark background, replace "light" with "dark" on the
-		  first line.
-		* If you want the user to be able to specify either a light or dark
-		  background in their vimrc, remove the first line completely.
-
 	All of the colour customisation is done in my_colour_scheme.txt.  The
 	format of this is very simple.  An example is below:
 >
@@ -176,7 +199,7 @@ Copyright:  (c) 2011 by A. S. Budden                  *EasyColour-copyright*
 	
 	So the line 'Error:Yellow,Red' will make errors be shown as yellow text on
 	a red background.  There are other ways to define colours as well; these
-	are detailed in |EasyColour-format|.
+	are detailed in |EasyColour-colour-spec|.
 
 	The special colour is treated slightly differently in non-GUI Vim.  It is
 	usually set in order to specify the colour of an undercurl.  However, in
@@ -199,9 +222,169 @@ Copyright:  (c) 2011 by A. S. Budden                  *EasyColour-copyright*
 	There are some other examples in the "colors/" directory in the EasyColour
 	distribution as well.
 
+------------------------------------------------------------------------------
+
 2.4 Format Reference                   *EasyColour-format*                  {{{2
 
-	TODO...
+2.4.1 Overview                         *EasyColour-overview*                {{{3
+
+	All lines in the text file must either start with a configuration option
+	(for a full list, see |EasyColour-config|), a section header (for details,
+	see |EasyColour-sections|), a '#' character (see |EasyColour-comments|) or
+	with a hard-tab character and a colour specification (for details, see
+	|EasyColour-colour-spec|).  Empty lines are ignored.
+
+2.4.2 Comments                         *EasyColour-comments*                {{{3
+
+	Any line that has a '#' as the first character is a comment and will be
+	ignored by EasyColour.  Similarly any line beginning with a tab character
+	AND THEN a '#' character will be ignored.
+
+2.4.3 Configuration                    *EasyColour-config*                  {{{3
+
+	Background						   *EasyColour-Background*
+
+		The background colour can be specified either by setting the
+		'background' option near the start of your |vimrc|), or by adding a
+		line somewhere in your colour scheme definition that contains (with no
+		leading spaces/tabs):
+>
+			Background:Light
+<
+		or:
+>
+			Background:Dark
+<
+		If specified in the colour scheme definition, it will override the
+		'background' option.  This should be used for colour schemes that only
+		work with one background colour.
+
+	Basis							   *EasyColour-Basis*
+
+		This setting can be used to base a colour scheme on an existing one.
+		The colours from the basis colour scheme will be loaded prior to any
+		customisation happening.  Some features (in particular automatic
+		generation of colour schemes for a different background colour) will
+		only work for the colours that have been specified manually and not
+		for those derived from the base colour scheme.  Example:
+>
+			Basis:default
+<
+	LightAuto						   *EasyColour-LightAuto*
+
+		If set to True or 1, a light colour scheme will be automatically
+		generated from the defined dark colour scheme.  Individual colours can
+		then be overridden using the |EasyColour-LightOverride| section.  See
+		the Bandit colour scheme (included in the EasyColour distribution) for
+		an example.
+
+	DarkAuto						   *EasyColour-DarkAuto*
+
+		This setting works in the same way as |EasyColour-LightAuto| for
+		automatically generating a dark colour scheme from a light one.  The
+		two settings are mutually exclusive and if DarkAuto is set, LightAuto
+		will be ignored.
+
+2.4.4 Sections                         *EasyColour-sections*                {{{3
+
+	Light							   *EasyColour-Light*
+
+		This section is used to define the colours to be used when the
+		background is a light colour.  It is started with a line containing
+		only (with no leading spaces):
+>
+			Light:
+<
+		Colour specifications (see |EasyColour-colour-spec|) are then provided
+		for each highlight |group-name| for which you wish to define a colour.
+
+	Dark							   *EasyColour-Dark*
+
+		This section is used to define the colours to be used when the
+		background is a dark colour.  It is started with a line containing
+		only (with no leading spaces):
+>
+			Dark:
+<
+		Colour specifications (see |EasyColour-colour-spec|) are then provided
+		for each highlight |group-name| for which you wish to define a colour.
+
+	LightOverride					   *EasyColour-LightOverride*
+
+		This section is used in combination with the |EasyColour-LightAuto|
+		setting to override some of the automatically generated colours when
+		the main colour scheme assumes a dark background and the light
+		background colours are auto-generated.
+
+	DarkOverride					   *EasyColour-DarkOverride*
+
+		This section is used in combination with the |EasyColour-DarkAuto|
+		setting to override some of the automatically generated colours when
+		the main colour scheme assumes a light background and the dark
+		background colours are auto-generated.
+
+2.4.5 Colour Specification             *EasyColour-colour-spec*             {{{3
+
+	Each colour specification line consists of a single hard-tab character, a
+	highlight |group-name|, a single colon (:) and then the details of the
+	colour that is required.  For example, to specify that errors are shown
+	with white text on a red background, use the following:
+>
+		--->Error:White,Red
+<
+	(where '--->' is used to indicate a tab character).
+
+	Colours can either be specified as names such as Red or White (see
+	|gui-colors|) or as RGB colours such as #ff0000 or #11f0c3.
+
+	There are four components that can be configured:
+
+		* Foreground Colour
+		* Background Colour
+		* Special Colour (the colour of undercurls)
+		* Style (choose from 'Underline', 'Undercurl', 'Bold' etc)
+
+	The special colour is treated slightly differently in non-GUI Vim.  It is
+	usually set in order to specify the colour of an undercurl.  However, in
+	non-GUI Vim, undercurls are not supported and they are replaced with an
+	underline in the foreground colour.  Therefore, the 'special colour' is
+	used as the foreground colour in non-GUI Vim unless the foreground colour
+	is set explicitly (in which case it is ignored).
+
+	Colours can be specified either by listing them (comma separated) in the
+	order shown above, or by using the keywords "FG", "BG", "SP" and "Style"
+	to define them explicitly.
+
+	The following lines are all equivalent:
+>
+		--->Statement:Blue,Green,Red,Undercurl
+		--->Statement:FG=Blue,BG=Green,SP=Red,Style=Undercurl
+		--->Statement:Blue,Green,Style=Undercurl,SP=Red
+		--->Statement:SP=Red,Style=Undercurl,BG=Green,FG=Blue
+<
+	Any entries that are not required can be omitted.  Some examples:
+>
+		# Dark background definitions:
+		Dark:
+		---># This sets unhighlighted text to be white-on-black:
+		--->Normal:White,Black
+		--->
+		---># This sets comments to be green on the 'normal'
+		---># background colour (in this case black)
+		--->Comments:Green
+		--->
+		---># This sets preprocessor statements to be blue and bold
+		--->PreProc:Blue,Style=Bold
+		--->
+		---># This sets the fold colum to be dark blue text
+		---># on a grey background
+		--->FoldColumn:DarkBlue:Grey
+		--->
+		---># This makes the sign column have a dark grey background
+		---># with the default (white in this case) text.
+		--->SignColumn:BG=#222222
+<
+------------------------------------------------------------------------------
 
 2.5 Highlight Group Reference          *EasyColour-highlight*               {{{2
 
