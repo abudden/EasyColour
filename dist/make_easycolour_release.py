@@ -120,7 +120,7 @@ def CheckInChanges(r):
     args = GIT+['commit','-m','Release build {0}'.format(r)]
     p = subprocess.Popen(args)
     (stdout,stderr) = p.communicate()
-    args = GIT+['tag','taghighlight-release-{0}'.format(r)]
+    args = GIT+['tag','easycolour-release-{0}'.format(r)]
     p = subprocess.Popen(args)
     (stdout,stderr) = p.communicate()
     args = GIT+['push','origin','master','--tags']
