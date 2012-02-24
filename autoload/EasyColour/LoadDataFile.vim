@@ -46,9 +46,7 @@ function! s:LoadFile(filename)
 			" Comment: ignore
 		elseif entry[0] =~ '\k'
 			" Keyword character first, so not sub entry or top-levelcomment
-			if entry[1] == '#'
-				" Comment: ignore
-			elseif entry[len(entry)-1:] == ":"
+			if entry[len(entry)-1:] == ":"
 				" Beginning of a field, but we don't know whether
 				" it's a list of a dict yet
 				let top_key = entry[:len(entry)-2]
@@ -73,7 +71,9 @@ function! s:LoadFile(filename)
 		elseif top_key != '' && entry =~ '^\s\+'
 			" This is a continuation of a top level key
 			let details = substitute(entry, '^\s\+', '', '')
-			if stridx(details, ':') != -1
+			if details[0] == '#'
+				" Comment: ignore
+			elseif stridx(details, ':') != -1
 				" The key is a dictionary:
 				if ! has_key(result, top_key)
 					let result[top_key] = {}
@@ -87,12 +87,17 @@ function! s:LoadFile(filename)
 				if len(parts) > 2
 					let parts[1] = join(parts[1:], ':')
 				endif
-				if stridx(parts[1], ',') != -1
-					" This entry is a list
-					let result[top_key][parts[0]] = split(parts[1], ',')
-				else
-					let result[top_key][parts[0]] = parts[1]
-				endif
+				" If there are multiple keys, apply the 
+				" right-hand side to all keys
+				let keys = split(parts[0],',')
+				for key in keys
+					if stridx(parts[1], ',') != -1
+						" This entry is a list
+						let result[top_key][key] = split(parts[1], ',')
+					else
+						let result[top_key][key] = parts[1]
+					endif
+				endfor
 			else
 				echoerr "Type mismatch on line '".entry."': expected key:value"
 			endif

@@ -1,5 +1,9 @@
 # Saving this file will update the current colour scheme.
 Basis:None
+Colours:
+	Violet:#EE82EE
+	CoralRed:#FF4040
+	DavysGrey:#555555
 Dark:
 	Normal:White,Black
 	Comment:Green
@@ -13,11 +17,10 @@ Dark:
 	String:LightYellow
 	Character:DarkYellow
 	PreProc:Blue,Style=Bold
-	Include:Blue,Style=Bold
-	Define:#5555FF,Style=Bold
-	Macro:#5555FF,Style=Bold
+	Include:@PreProc
+	Define,Macro:#5555FF,Style=Bold
 	PreCondit:#8888FF,Style=Bold
-	Statement:Blue,Style=Bold
+	Statement:@PreProc
 	Conditional:#5555FF
 	Repeat:#8888FF
 	Label:#2222FF
@@ -27,7 +30,7 @@ Dark:
 	Function:#007777
 	Method:#009966
 	Class:Purple
-	DefinedName:#EE82EE
+	DefinedName:Violet
 	EnumerationValue:#C000C0
 	EnumerationName:#FF22FF
 	Member:DarkGrey
@@ -36,12 +39,12 @@ Dark:
 	LocalVariable:#AAA14C
 	GlobalConstant:#BBBB00
 	Type:#FF8000
-	StorageClass:#FF4040
+	StorageClass:CoralRed
 	Structure:#FF8080
 	Special:Red
 	SpecialChar:#AA0000
-	SpecialKey:#555555
-	NonText:#555555
+	SpecialKey:DavysGrey
+	NonText:DavysGrey
 	MatchParen:Yellow,Style=Underline
 	Error:White,Red
 	NonIndentTabError:SP=#FFAA00,Style=Undercurl
@@ -62,7 +65,7 @@ Dark:
 	htmlH5:#8888AA
 	htmlH6:#888888
 	Delimiter:DarkCyan
-	hlLevel0:DarkCyan
+	hlLevel0:@Delimiter
 	hlLevel1:#bfbf00
 	hlLevel2:#990033
 	hlLevel3:#334488

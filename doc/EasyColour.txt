@@ -287,6 +287,33 @@ Copyright:  (c) 2011-2012 by A. S. Budden                  *EasyColour-copyright
 
 2.4.4 Sections                         *EasyColour-sections*                {{{3
 
+	Colours							   *EasyColour-Colours*
+
+		This section allows you to define custom named colours that can then
+		be used elsewhere in the colour scheme.  It is not required for a
+		colour scheme.  If you'd rather just use standard named colours (such
+		as 'Blue' or RGB colours such as '#0F4F6A') then you can do that
+		without a 'Colours' section.  The 'Colours' section simply allows you
+		to give more convenient names to non-standard RGB colours.  For
+		example, if you really like Burnt Sienna and Ochre want to use them
+		for several highlight groups, you can do something like this:
+>
+			Colours:
+			--->BurntSienna:#E97451
+			--->Ochre:#CC7722
+<
+		(where ---> indicates a hard tab character).
+
+		The new colour names can then be used anywhere in the colour
+		specification (see |EasyColour-colour-spec|).  Colour names should
+		consist of ASCII letters, digits and the underscore.  They should
+		start with an ASCII letter.
+
+		If you use the Colours section to define a colour that is already
+		specified by Vim, your custom definition will take precedence (so if,
+		for some reason you define Blue to be #FF0000 then anything specified
+		as Blue will be shown in Red).  This is probably a bad idea.
+
 	Light							   *EasyColour-Light*
 
 		This section is used to define the colours to be used when the
@@ -384,6 +411,25 @@ Copyright:  (c) 2011-2012 by A. S. Budden                  *EasyColour-copyright
 		---># with the default (white in this case) text.
 		--->SignColumn:BG=#222222
 <
+2.4.6 Linking Highlight Groups         *EasyColour-links*                   {{{3
+
+	If you wish to highlight (e.g.) the Statement highlight group in the same
+	way as the Keyword highlight group, you can define the Statement colour
+	specification like this:
+>
+		--->Statement:@Keyword
+<
+	Hopefully the syntax is obvious, but it simply consists of the '@' symbol
+	followed by the name of the other highlight group to copy.
+
+	Another way to link highlight groups is to specify multiple groups on the
+	left-hand side of a colour specification, something like this:
+>
+		--->Statement,Keyword:Blue,Green,Red,Undercurl
+<
+	To highlight BOTH the Statement and Keyword groups as blue text on a green
+	background with a red undercurl.
+
 ------------------------------------------------------------------------------
 
 2.5 Highlight Group Reference          *EasyColour-highlight*               {{{2
@@ -396,6 +442,12 @@ Copyright:  (c) 2011-2012 by A. S. Budden                  *EasyColour-copyright
 
 ==============================================================================
 3. EasyColour History                  *EasyColour-history*                 {{{1
+
+x.x.x:  xxxx xxxxxxxx 2012     : Added support for custom colour definitions
+                                 (the 'Colours' section).  Added support for
+                                 linking highlight groups together (with the @
+								 Now allow multiple highlight groups on the
+								 left of the ':'.
 
 1.0.0:  23rd February 2012     : First public release.
 
