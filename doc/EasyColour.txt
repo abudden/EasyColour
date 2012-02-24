@@ -444,10 +444,10 @@ Copyright:  (c) 2011-2012 by A. S. Budden                  *EasyColour-copyright
 3. EasyColour History                  *EasyColour-history*                 {{{1
 
 1.1.0:  24th February 2012     : Added support for custom colour definitions
-                                 (the 'Colours' section).  Added support for
-                                 linking highlight groups together (with the @
-								 Now allow multiple highlight groups on the
-								 left of the ':'.
+								 (the 'Colours' section).  Added support for
+								 linking highlight groups together (with the @
+								 symbol).  Now allow multiple highlight groups
+								 on the left of the ':'.
 
 1.0.0:  23rd February 2012     : First public release.
 
