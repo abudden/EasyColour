@@ -75,7 +75,7 @@ def MakeMainRelease(r):
     # List of paths to include (either explicit files or paths to search)
     paths = {
             '.vim': ['ftplugin/EasyColour.vim','autoload/EasyColour','syntax/EasyColour.vim','colors'],
-            '.txt': ['autoload/EasyColour', 'doc/EasyColour.txt', 'colors'],
+            '.txt': ['autoload/EasyColour', 'doc/EasyColour.txt', 'colors', 'rgb.txt'],
             }
     filename = 'easycolour_r{0}.zip'.format(r)
     MakeZipFile(filename, paths)
