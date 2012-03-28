@@ -24,6 +24,7 @@ let s:RGBMap = {}
 let s:loaded_rgb_map = 0
 let s:loaded_colour_cache = 0
 let s:calculated_available_colours = 0
+let s:need_to_write_cache = 0
 
 let s:plugin_paths = split(globpath(&rtp, 'autoload/EasyColour/Translate.vim'), '\n')
 if len(s:plugin_paths) == 1
@@ -172,7 +173,7 @@ function! s:LoadColourCache()
 	endif
 	let mainkey = 'NO_KEY_FOUND'
 	for line in readfile(s:cache_file)
-		if line[0] == '\t' && mainkey != 'NO_KEY_FOUND'
+		if line[0] == "\t" && mainkey != 'NO_KEY_FOUND'
 			let parts = split(line[1:], ':')
 			let s:ColourCache[mainkey][parts[0]] = parts[1]
 		elseif len(line) > 0
@@ -185,6 +186,9 @@ function! s:LoadColourCache()
 endfunction
 
 function! EasyColour#Translate#WriteColourCache()
+	if s:need_to_write_cache == 0
+		return
+	endif
 	let lines = []
 	for key in keys(s:ColourCache)
 		let lines += [key]
@@ -192,6 +196,7 @@ function! EasyColour#Translate#WriteColourCache()
 			let lines += ["\t" . subkey . ':' . s:ColourCache[key][subkey]]
 		endfor
 	endfor
+	call delete(s:cache_file)
 	call writefile(lines, s:cache_file)
 endfunction
 
@@ -234,6 +239,9 @@ function! EasyColour#Translate#FindNearest(subset, colour)
 	else
 		let s:ColourCache[a:subset] = {}
 	endif
+
+	" If we got here, we need to write the cache
+	let s:need_to_write_cache = 1
 
 	if ! s:calculated_available_colours
 		call s:CalculateAvailableRGBColours()

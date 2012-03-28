@@ -20,7 +20,6 @@ catch
 endtry
 let g:loaded_EasyColourColourScheme = 1
 
-let s:need_to_write_cache = 0
 if ! exists('g:EasyColourDebug')
 	let g:EasyColourDebug = 0
 endif
@@ -33,10 +32,7 @@ function! EasyColour#ColourScheme#LoadColourScheme(name)
 		endif
 		exe command
 	endfor
-	if s:need_to_write_cache == 1
-		call EasyColour#Translate#WriteColourCache()
-		let s:need_to_write_cache = 0
-	endif
+	call EasyColour#Translate#WriteColourCache()
 	let g:colors_name = a:name
 endfunction
 
@@ -222,7 +218,6 @@ function! s:StandardHandler(ColourScheme, details)
 			elseif field_colour_map[hlgroup][field] == 'NONE'
 				let modified_colours[hlgroup][field] = 'NONE'
 			else
-				let s:need_to_write_cache = 1
 				let modified_colours[hlgroup][field] = 
 							\ EasyColour#Translate#FindNearest(colour_map, field_colour_map[hlgroup][field])
 			endif
@@ -329,7 +324,6 @@ function! s:AutoHandler(ColourScheme, basis, details)
 				elseif modified_colours[hlgroup][field] == 'NONE'
 					" Leave as is
 				else
-					let s:need_to_write_cache = 1
 					let modified_colours[hlgroup][field] = 
 								\ EasyColour#Translate#FindNearest(colour_map, modified_colour)
 				endif
