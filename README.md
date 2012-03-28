@@ -2,6 +2,6 @@ This plugin makes it really easy to create your own colour scheme for Vim.  You 
 
 There's more information available on the website:
 
-  http://www.cgtk.co.uk/easycolour
+  http://www.cgtk.co.uk/vim-scripts/easycolour
 
 Detailed documentation can be found in [doc/EasyColour.txt](https://github.com/abudden/EasyColour/blob/master/doc/EasyColour.txt).

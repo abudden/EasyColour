@@ -31,11 +31,20 @@ endtry
 
 syn match Keyword /^\k\+:/me=e-1
 syn match Comment /^\s*#.*/
+syn region EasyColourBlock start=/^\(Dark\|Light\)\(Override\)\?:/ end=/^\k/me=s-1 contains=Keyword,Comment
+syn region EasyColourDefs start=/^Colours:/ end=/^\k/me=s-1 contains=Keyword,Comment
+syn region EasyColourSpecification start=/^\(\t\| \+\)#\@!/ end=/:/ containedin=EasyColourBlock contained
+syn region EasyColourCustomColour start=/^\(\t\| \+\)#\@!/ end=/:/ containedin=EasyColourDefs contained
+syn region EasyColourLink start=/@/ end=/$/
 for keyword in keywords
 	if keyword =~ '^\k*$'
-		execute 'syn match '.keyword.' /^\(\t\| \+\)\zs'.keyword.":/ms=s,me=e-1"
+		execute 'syn keyword '.keyword.' '.keyword.' containedin=EasyColourSpecification,EasyColourLink contained'
 	endif
 endfor
 
+for custom_colour in keys(g:EasyColourCustomColours)
+	execute 'syn keyword EasyColourCustom'.custom_colour.' '.custom_colour.' containedin=EasyColourCustomColour contained'
+	execute 'hi EasyColourCustom'.custom_colour.' guifg='.g:EasyColourCustomColours[custom_colour].' guibg=NONE gui=NONE'
+endfor
 
 let b:current_syntax = "EasyColour"

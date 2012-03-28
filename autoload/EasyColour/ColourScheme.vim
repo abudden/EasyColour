@@ -21,11 +21,16 @@ endtry
 let g:loaded_EasyColourColourScheme = 1
 
 let s:need_to_write_cache = 0
-
+if ! exists('g:EasyColourDebug')
+	let g:EasyColourDebug = 0
+endif
 
 function! EasyColour#ColourScheme#LoadColourScheme(name)
 	let command_list = EasyColour#ColourScheme#GetColourSchemeLoadCommands(a:name)
 	for command in command_list
+		if g:EasyColourDebug == 1
+			echomsg command
+		endif
 		exe command
 	endfor
 	if s:need_to_write_cache == 1
@@ -38,6 +43,13 @@ endfunction
 function! EasyColour#ColourScheme#GetColourSchemeLoadCommands(name)
 	let ColourScheme = EasyColour#LoadDataFile#LoadColourSpecification(a:name)
 	let command_list = []
+
+	if ! has_key(ColourScheme, 'Colours')
+		let ColourScheme['Colours'] = {}
+	endif
+
+	" Used by the colour scheme file highlighter
+	let g:EasyColourCustomColours = ColourScheme['Colours']
 
 	if has_key(ColourScheme, 'Background')
 		let &background = tolower(ColourScheme['Background'])
@@ -92,7 +104,7 @@ function! EasyColour#ColourScheme#GetColourSchemeLoadCommands(name)
 				let ColourScheme[details]['Normal'] = ["Black","White"]
 			endif
 		endif
-		let command_list += s:StandardHandler(ColourScheme[details])
+		let command_list += s:StandardHandler(ColourScheme, details)
 	elseif handler == 'Auto'
 		let command_list += s:AutoHandler(ColourScheme, basis, details)
 	endif
@@ -140,6 +152,12 @@ function! s:GenerateColourMap(Colours)
 			let group_colours = [a:Colours[hlgroup]]
 		endif
 
+		" Links
+		if len(group_colours) == 1 && group_colours[0][0] == '@'
+			let field_colour_map[hlgroup] = {'Link': group_colours[0][1:]}
+			continue
+		endif
+
 		let highlight_map = {}
 		let index = 0
 		let handled = []
@@ -181,14 +199,24 @@ function! s:GenerateColourMap(Colours)
 	return field_colour_map
 endfunction
 
-function! s:StandardHandler(Colours)
-	let field_colour_map = s:GenerateColourMap(a:Colours)
+function! s:StandardHandler(ColourScheme, details)
+	let Colours = a:ColourScheme[a:details]
+	let field_colour_map = s:GenerateColourMap(Colours)
 	let colour_map = s:GetColourMap()
 
 	let modified_colours = {}
 	for hlgroup in keys(field_colour_map)
 		let modified_colours[hlgroup] = {}
+		if has_key(field_colour_map[hlgroup], 'Link')
+			" This is a link entry: just copy across
+			let modified_colours[hlgroup] = field_colour_map[hlgroup]
+			continue
+		endif
 		for field in keys(field_colour_map[hlgroup])
+			if s:all_fields[field] != 'Style' && has_key(a:ColourScheme['Colours'], field_colour_map[hlgroup][field])
+				let field_colour_map[hlgroup][field] = a:ColourScheme['Colours'][field_colour_map[hlgroup][field]]
+			endif
+
 			if colour_map == 'None' || s:all_fields[field] == 'Style'
 				let modified_colours[hlgroup][field] = field_colour_map[hlgroup][field]
 			elseif field_colour_map[hlgroup][field] == 'NONE'
@@ -217,11 +245,15 @@ function! s:RunHighlighter(map)
 			endif
 		endif
 
-		let command = 'hi ' . hlgroup
-		for field in keys(a:map[hlgroup])
-			let command .= ' ' . field . '=' . a:map[hlgroup][field]
-		endfor
-		let command_list += [command]
+		if has_key(a:map[hlgroup], 'Link')
+			let command = 'hi link ' . hlgroup . ' ' . a:map[hlgroup]['Link']
+		else
+			let command = 'hi ' . hlgroup
+			for field in keys(a:map[hlgroup])
+				let command .= ' ' . field . '=' . a:map[hlgroup][field]
+			endfor
+		endif
+		let command_list += ['hi clear ' . hlgroup, command]
 	endfor
 	return command_list
 endfunction
@@ -243,6 +275,13 @@ function! s:AutoHandler(ColourScheme, basis, details)
 	let modified_colours = {}
 	for hlgroup in keys(standard_field_colour_map)
 		let modified_colours[hlgroup] = {}
+
+		if has_key(standard_field_colour_map[hlgroup], 'Link')
+			" This is a link entry: just copy across
+			let modified_colours[hlgroup] = standard_field_colour_map[hlgroup]
+			continue
+		endif
+
 		for field in keys(standard_field_colour_map[hlgroup])
 			if s:all_fields[field] == 'Style'
 				" Don't modify style hints
@@ -253,10 +292,18 @@ function! s:AutoHandler(ColourScheme, basis, details)
 				let modified_colours[hlgroup][field] = 'NONE'
 				continue
 			elseif hlgroup == 'Normal'
+				" Handle customised colours
+				if s:all_fields[field] != 'Style' && has_key(a:ColourScheme['Colours'], standard_field_colour_map[hlgroup][field])
+					let standard_field_colour_map[hlgroup][field] = a:ColourScheme['Colours']
+				endif
 				" Do a complete colour invert on normal
 				let std_colour = EasyColour#Translate#GetHexColour(standard_field_colour_map[hlgroup][field])
 				let modified_colours[hlgroup][field] = EasyColour#Shade#Invert(std_colour)
 			else
+				" Handle customised colours
+				if s:all_fields[field] != 'Style' && has_key(a:ColourScheme['Colours'], standard_field_colour_map[hlgroup][field])
+					let standard_field_colour_map[hlgroup][field] = a:ColourScheme['Colours']
+				endif
 				let std_colour = EasyColour#Translate#GetHexColour(standard_field_colour_map[hlgroup][field])
 				" Modify the colour if it's too dark or too light
 				if a:details == 'Dark'
@@ -271,6 +318,10 @@ function! s:AutoHandler(ColourScheme, basis, details)
 				let override_key = a:details . 'Override'
 				if has_key(override_map, hlgroup) && has_key(override_map[hlgroup], field)
 					let modified_colour = override_map[hlgroup][field]
+					" Handle customised colours
+					if s:all_fields[field] != 'Style' && has_key(a:ColourScheme['Colours'], modified_colour)
+						let modified_colour = a:ColourScheme['Colours']
+					endif
 				endif
 
 				if colour_map == 'None' || s:all_fields[field] == 'Style'
