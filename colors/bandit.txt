@@ -32,7 +32,7 @@ Dark:
 	EnumerationName:#FF22FF
 	Member:DarkGrey
 	Union:Grey
-	GlobalVariable:#666600
+	GlobalVariable:#888800
 	LocalVariable:#AAA14C
 	GlobalConstant:#BBBB00
 	Type:#FF8000
@@ -40,8 +40,8 @@ Dark:
 	Structure:#FF8080
 	Special:Red
 	SpecialChar:#AA0000
-	SpecialKey:#555555
-	NonText:#555555
+	SpecialKey:#777777
+	NonText:#777777
 	MatchParen:Yellow,Style=Underline
 	Error:White,Red
 	NonIndentTabError:SP=#FFAA00,Style=Undercurl
