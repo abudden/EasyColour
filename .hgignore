@@ -1,0 +1,5 @@
+syntax: glob
+
+.*.swp
+doc/tags
+easycolour_cache.txt

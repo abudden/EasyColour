@@ -4,4 +4,6 @@ There's more information available on the website:
 
   http://www.cgtk.co.uk/vim-scripts/easycolour
 
-Detailed documentation can be found in [doc/EasyColour.txt](https://github.com/abudden/EasyColour/blob/master/doc/EasyColour.txt).
+The source is managed in Mercurial and is available on [bitbucket](https://bitbucket.org/abudden/easycolour).  It is also mirrored on [github](https://github.com/abudden/EasyColour).
+
+Detailed documentation can be found in [doc/EasyColour.txt](https://bitbucket.org/abudden/easycolour/src/default/doc/EasyColour.txt).
