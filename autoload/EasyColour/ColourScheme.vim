@@ -297,7 +297,7 @@ function! s:AutoHandler(ColourScheme, basis, details)
 			else
 				" Handle customised colours
 				if s:all_fields[field] != 'Style' && has_key(a:ColourScheme['Colours'], standard_field_colour_map[hlgroup][field])
-					let standard_field_colour_map[hlgroup][field] = a:ColourScheme['Colours']
+					let standard_field_colour_map[hlgroup][field] = a:ColourScheme['Colours'][standard_field_colour_map[hlgroup][field]]
 				endif
 				let std_colour = EasyColour#Translate#GetHexColour(standard_field_colour_map[hlgroup][field])
 				" Modify the colour if it's too dark or too light
